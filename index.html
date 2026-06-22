@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J'entre dans l'image - Écrire avec ses sens</title>
+    <!-- Tailwind CSS pour un design rapide, responsive et ludique -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Nunito pour une lecture facile et adaptée aux enfants -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Librairie de Confettis pour la gamification -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: {
+                        school: {
+                            blue: '#4A90E2',
+                            yellow: '#F5A623',
+                            green: '#7ED321',
+                            red: '#D0021B',
+                            dark: '#4A4A4A',
+                            paper: '#FDFBF7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #e0f2fe; }
+        .tab-content { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .word-chip {
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .word-chip:hover { transform: scale(1.02); }
+        
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .drop-zone { min-height: 100px; border: 3px dashed #cbd5e1; transition: background-color 0.3s; }
+        .drop-zone.filled { border: 3px solid #7ED321; background-color: #f0fdf4; }
+
+        .notebook-lines {
+            background-image: repeating-linear-gradient(transparent, transparent 31px, #e2e8f0 31px, #e2e8f0 32px);
+            background-attachment: local;
+            line-height: 32px;
+        }
+        
+        /* Stylisation spéciale pour les selects (menus déroulants) dans le texte */
+        .transition-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%234A90E2" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            padding-right: 32px !important;
+            padding-left: 10px;
+        }
+
+        /* Stylisation spéciale pour le menu déroulant de l'action de départ */
+        .start-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%234A90E2" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 56px !important;
+        }
+    </style>
+</head>
+<body class="text-school-dark font-sans h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="bg-school-blue text-white p-4 shadow-md z-10 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-palette text-3xl text-school-yellow"></i>
+            <h1 class="text-2xl font-bold">J'entre dans l'image</h1>
+        </div>
+        <div class="hidden md:block font-semibold bg-white/20 px-4 py-2 rounded-full">
+            🎯 Objectif : J'écris avec mes sens et mes émotions
+        </div>
+    </header>
+
+    <!-- NAVIGATION (ONGLETS) -->
+    <nav class="bg-white shadow-sm flex overflow-x-auto">
+        <button onclick="switchTab('tab1')" id="btn-tab1" class="tab-btn flex-1 py-4 px-6 text-center font-bold text-school-blue border-b-4 border-school-blue hover:bg-blue-50 transition whitespace-nowrap">
+            <i class="fa-solid fa-book-open mr-2"></i> 1. Découverte
+        </button>
+        <button onclick="switchTab('tab2')" id="btn-tab2" class="tab-btn flex-1 py-4 px-6 text-center font-bold text-gray-400 border-b-4 border-transparent hover:bg-blue-50 transition whitespace-nowrap">
+            <i class="fa-solid fa-hand-pointer mr-2"></i> 2. Pratique guidée
+        </button>
+        <button onclick="switchTab('tab3')" id="btn-tab3" class="tab-btn flex-1 py-4 px-6 text-center font-bold text-gray-400 border-b-4 border-transparent hover:bg-blue-50 transition whitespace-nowrap">
+            <i class="fa-solid fa-pencil mr-2"></i> 3. Défi autonome
+        </button>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-[url('https://www.transparenttextures.com/patterns/notebook.png')]">
+        
+        <!-- ========================================== -->
+        <!-- ONGLET 1 : DÉCOUVERTE / EXPLICATIONS       -->
+        <!-- ========================================== -->
+        <section id="tab1" class="tab-content active max-w-5xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10">
+                <h2 class="text-3xl font-bold text-school-blue mb-6 border-b-2 border-school-yellow inline-block pb-2">Plonge dans le décor ! 🪄</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    
+                    <!-- Explications et Modèles -->
+                    <div class="flex flex-col gap-6">
+                        <div class="bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+                            <h3 class="text-xl font-bold text-school-blue mb-3">🪄 Comment ça fonctionne ?</h3>
+                            <p class="text-gray-700 mb-4">
+                                La méthode <strong>« J'entre dans l'image »</strong> t'invite à imaginer que tu traverses l'écran ou le papier pour te retrouver au cœur d'une illustration !
+                            </p>
+                            <p class="font-bold mb-2 text-school-dark text-sm">Pose-toi alors ces questions magiques :</p>
+                            <ul class="space-y-1.5 text-sm text-gray-700 list-disc list-inside">
+                                <li>👁️ Que <strong>vois-tu</strong> autour de toi ?</li>
+                                <li>👂 Qu'<strong>entends-tu</strong> comme bruits ?</li>
+                                <li>👃 Que <strong>sens-tu</strong> comme odeurs ?</li>
+                                <li>❤️ Que <strong>ressens-tu</strong> comme émotions ?</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Modèles complets pour inspirer -->
+                        <div class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 shadow-sm">
+                            <p class="font-bold text-school-dark mb-4 text-lg"><i class="fa-solid fa-star text-school-yellow"></i> Modèles inspirants :</p>
+                            <ul class="space-y-3 text-sm text-gray-800">
+                                <li class="bg-white p-3 rounded shadow-sm border-l-4 border-purple-400">
+                                    <span class="font-bold">👁️ + ❤️ :</span> Je vois des affiches colorées et je me sens curieux de découvrir ma nouvelle classe.
+                                </li>
+                                <li class="bg-white p-3 rounded shadow-sm border-l-4 border-blue-400">
+                                    <span class="font-bold">👂 + ❤️ :</span> J'entends la cloche sonner et je me sens excité de commencer l'année scolaire.
+                                </li>
+                                <li class="bg-white p-3 rounded shadow-sm border-l-4 border-green-400">
+                                    <span class="font-bold">👃 + ❤️ :</span> Je sens l'odeur des livres neufs et je me sens impatient d'apprendre.
+                                </li>
+                                <li class="bg-white p-3 rounded shadow-sm border-l-4 border-orange-400">
+                                    <span class="font-bold">✋ + ❤️ :</span> Je touche les pages lisses de mon cahier et je me sens fier de commencer un nouveau projet.
+                                </li>
+                                <li class="bg-white p-3 rounded shadow-sm border-l-4 border-pink-400">
+                                    <span class="font-bold">👅 + ❤️ :</span> Je goûte ma collation préférée pendant la récréation et je me sens heureux avec mes amis.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Simulateur interactif -->
+                    <div class="bg-school-paper rounded-xl p-6 shadow-inner border-2 border-gray-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-school-dark">Simulateur d'idées 🛠️</h3>
+                        </div>
+                        
+                        <p class="mb-2 text-sm text-gray-500 uppercase tracking-wide font-bold">Ton paragraphe :</p>
+                        
+                        <!-- Zone de texte interactive -->
+                        <div class="text-xl leading-relaxed bg-white p-5 rounded-lg shadow-sm border border-gray-200 mb-6 min-h-[200px]" id="sim-sentence">
+                            <!-- Le contenu sera généré en JavaScript -->
+                        </div>
+
+                        <p class="mb-3 text-sm text-gray-500 uppercase tracking-wide font-bold">Ajoute des sens pour allonger ton texte :</p>
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                            <button onclick="addIdea('voir')" id="btn-voir" class="sim-btn text-left p-3 rounded-lg border-2 border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition shadow-sm">
+                                👁️ Je vois
+                            </button>
+                            <button onclick="addIdea('entendre')" id="btn-entendre" class="sim-btn text-left p-3 rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition shadow-sm">
+                                👂 J'entends
+                            </button>
+                            <button onclick="addIdea('sentir')" id="btn-sentir" class="sim-btn text-left p-3 rounded-lg border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 transition shadow-sm">
+                                👃 Je sens (Odeur)
+                            </button>
+                            <button onclick="addIdea('toucher')" id="btn-toucher" class="sim-btn text-left p-3 rounded-lg border-2 border-gray-200 hover:border-orange-400 hover:bg-orange-50 transition shadow-sm">
+                                ✋ Je touche
+                            </button>
+                            <button onclick="addIdea('gouter')" id="btn-gouter" class="sim-btn text-left p-3 rounded-lg border-2 border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition shadow-sm">
+                                👅 Je goûte
+                            </button>
+                            <button onclick="addIdea('ressentir')" id="btn-ressentir" class="sim-btn text-left p-3 rounded-lg border-2 border-gray-200 hover:border-red-400 hover:bg-red-50 transition shadow-sm">
+                                ❤️ Je ressens
+                            </button>
+                        </div>
+                        <p class="text-xs text-center text-gray-400 mb-4 italic">Astuce: Clique plusieurs fois sur un bouton pour changer l'idée générée !</p>
+                        
+                        <button onclick="clearSim()" class="text-sm font-bold text-gray-500 hover:text-red-500 underline w-full text-center">
+                            <i class="fa-solid fa-trash mr-1"></i> Recommencer à zéro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- ONGLET 2 : PRATIQUE GUIDÉE                 -->
+        <!-- ========================================== -->
+        <section id="tab2" class="tab-content max-w-5xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10">
+                <div class="flex justify-between items-center mb-6 border-b-2 border-school-yellow pb-4">
+                    <h2 class="text-3xl font-bold text-school-blue">Au tableau ! 🧑‍🏫</h2>
+                    <div class="bg-school-yellow text-white font-bold text-xl px-4 py-2 rounded-full shadow">
+                        Score: <span id="score-display">0</span>/3
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6 text-sm flex gap-2 items-center">
+                    <i class="fa-solid fa-circle-info text-school-blue text-lg"></i>
+                    <p><strong>Astuces TNI :</strong> Touche un mot de la banque pour le placer. Dans la boîte, utilise les flèches <span class="bg-white px-1.5 py-0.5 rounded shadow border font-bold">←</span> et <span class="bg-white px-1.5 py-0.5 rounded shadow border font-bold">→</span> pour réordonner tes mots, ou touche le mot pour l'enlever.</p>
+                </div>
+
+                <!-- Zone de jeu -->
+                <div class="bg-blue-100/50 rounded-2xl p-6 border-2 border-blue-200">
+                    <!-- Indicateur du niveau -->
+                    <h3 class="text-xl font-bold text-school-dark mb-4" id="level-title">Phrase #1</h3>
+
+                    <!-- Zone de dépôt -->
+                    <div id="drop-zone" class="drop-zone rounded-xl p-4 flex flex-wrap gap-3 mb-8 items-center justify-center bg-white shadow-inner" ondragover="allowDrop(event)" ondrop="handleDropZone(event)">
+                        <!-- Les mots sélectionnés iront ici -->
+                    </div>
+
+                    <!-- Banque de mots -->
+                    <p class="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider">Banque de mots :</p>
+                    <div id="word-bank" class="flex flex-wrap gap-3 mb-8 min-h-[60px]" ondragover="allowDrop(event)" ondrop="handleBankZone(event)">
+                        <!-- Les mots à choisir iront ici -->
+                    </div>
+
+                    <!-- Contrôles -->
+                    <div class="flex flex-wrap gap-4 justify-center mt-6">
+                        <button onclick="checkAnswer()" class="bg-school-green text-white text-xl font-bold px-8 py-3 rounded-full shadow-lg hover:bg-green-600 hover:scale-105 transition flex items-center gap-2">
+                            <i class="fa-solid fa-check"></i> Vérifier
+                        </button>
+                        <button onclick="showHint()" class="bg-school-yellow text-white text-xl font-bold px-6 py-3 rounded-full shadow-lg hover:bg-yellow-600 hover:scale-105 transition flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb"></i> Indice
+                        </button>
+                        <button onclick="resetExercise()" class="bg-gray-400 text-white text-xl font-bold px-6 py-3 rounded-full shadow-lg hover:bg-gray-500 hover:scale-105 transition flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-right"></i> Recommencer
+                        </button>
+                    </div>
+
+                    <!-- Message de feedback -->
+                    <div id="feedback-message" class="mt-6 text-center text-xl font-bold hidden p-4 rounded-xl">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- ONGLET 3 : DÉFI AUTONOME                   -->
+        <!-- ========================================== -->
+        <section id="tab3" class="tab-content max-w-5xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10">
+                <h2 class="text-3xl font-bold text-school-blue mb-6 border-b-2 border-school-yellow inline-block pb-2">À toi de jouer ! ✍️</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                    
+                    <!-- Consignes claires et aérées -->
+                    <div class="bg-yellow-50 border-2 border-school-yellow/30 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-md">
+                        <div>
+                            <div class="flex items-center gap-3 mb-6">
+                                <span class="bg-school-yellow text-white text-2xl font-bold w-10 h-10 rounded-full flex items-center justify-center shadow">💡</span>
+                                <h3 class="text-2xl font-bold text-school-dark">Mission d'écrivain</h3>
+                            </div>
+                            
+                            <ul class="space-y-6 text-lg text-gray-700">
+                                <li class="flex items-start gap-3">
+                                    <span class="text-school-blue text-2xl mt-0.5">👁️</span>
+                                    <span><strong>Observe</strong> l'image projetée au tableau par ton enseignante ou ton enseignant.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-school-blue text-2xl mt-0.5">📝</span>
+                                    <span><strong>Complète</strong> les phrases et allonge ton histoire directement dans ton <strong>cahier d'écrivain</strong>.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-school-blue text-2xl mt-0.5">🔴</span>
+                                    <span>N'oublie pas tes <strong>majuscules</strong> et tes <strong>points</strong> pour que tes phrases soient bien construites.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-school-blue text-2xl mt-0.5">🗣️</span>
+                                    <span><strong>Partage</strong> ensuite tes plus belles phrases avec tes collègues de classe pour comparer vos idées !</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-school-yellow/20 flex gap-4 justify-center items-center">
+                            <i class="fa-solid fa-feather-pointed text-4xl text-school-yellow animate-bounce"></i>
+                            <p class="text-sm italic text-gray-500">Laisse parler ton imagination et fais voyager ton lecteur !</p>
+                        </div>
+                    </div>
+
+                    <!-- Checklist interactive d'auto-évaluation -->
+                    <div class="bg-school-paper border-2 border-gray-200 rounded-2xl p-6 md:p-8 shadow-inner flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-school-blue mb-4 pb-2 border-b border-gray-200">🔍 Ma grille de révision :</h3>
+                            <p class="text-sm text-gray-500 mb-6">Coche les critères au fur et à mesure que tu révises ton texte dans ton cahier :</p>
+                            
+                            <div class="space-y-4">
+                                <label class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition">
+                                    <input type="checkbox" class="w-6 h-6 rounded text-school-green focus:ring-school-green border-gray-300">
+                                    <span class="text-base font-medium">J'ai écrit au moins une phrase pour un sens (vue, ouïe...)</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition">
+                                    <input type="checkbox" class="w-6 h-6 rounded text-school-green focus:ring-school-green border-gray-300">
+                                    <span class="text-base font-medium">J'ai intégré au moins une émotion dans mon texte ❤️</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition">
+                                    <input type="checkbox" class="w-6 h-6 rounded text-school-green focus:ring-school-green border-gray-300">
+                                    <span class="text-base font-medium">Toutes mes phrases commencent par une majuscule 🔠</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition">
+                                    <input type="checkbox" class="w-6 h-6 rounded text-school-green focus:ring-school-green border-gray-300">
+                                    <span class="text-base font-medium">J'ai bien placé mes points à la fin de chaque idée 🔴</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition">
+                                    <input type="checkbox" class="w-6 h-6 rounded text-school-green focus:ring-school-green border-gray-300">
+                                    <span class="text-base font-medium">J'ai utilisé un mot de relation (Ex: Puis, Ensuite...) 🔗</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 bg-blue-50 p-4 rounded-xl border border-blue-100 text-center text-sm font-semibold text-school-blue">
+                            🎨 Prêt pour l'aventure ? Regarde le tableau de la classe !
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ==========================================
+        // GESTION DES ONGLETS
+        // ==========================================
+        function switchTab(tabId) {
+            // Cacher tout
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Réinitialiser les boutons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-school-blue', 'border-school-blue');
+                btn.classList.add('text-gray-400', 'border-transparent');
+            });
+
+            // Afficher le bon onglet
+            document.getElementById(tabId).classList.add('active');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('text-gray-400', 'border-transparent');
+            activeBtn.classList.add('text-school-blue', 'border-school-blue');
+        }
+
+
+        // ==========================================
+        // ONGLET 1 : SIMULATEUR D'IDÉES
+        // ==========================================
+        
+        let startSentence = "Quand j'arrive à l'école, je regarde autour de moi.";
+
+        // Base de données des phrases
+        const ideaBank = {
+            voir: [
+                "Je vois des affiches colorées sur les murs de la classe.",
+                "Je vois des pupitres bien alignés devant le tableau.",
+                "Je vois de nouveaux visages dans la classe.",
+                "Je vois des crayons multicolores dans mon étui.",
+                "Je vois la cour d'école remplie d'élèves souriants."
+            ],
+            entendre: [
+                "La cloche résonne avec un bruit étourdissant dans les corridors de l'école.",
+                "J'entends les rires joyeux des élèves dans la cour.",
+                "J'entends l'enseignante souhaiter la bienvenue à la classe.",
+                "J'entends les chaises grincer sur le plancher.",
+                "J'entends les discussions animées de mes camarades."
+            ],
+            sentir: [
+                "Dans la classe, ça sent la craie et le papier neuf.",
+                "Je sens l'odeur des livres tout juste sortis de leur boîte.",
+                "Je sens le parfum de mon efface neuve.",
+                "Je sens l'odeur du dîner qui vient de la cafétéria.",
+                "Je sens l'air frais qui entre par la fenêtre ouverte."
+            ],
+            toucher: [
+                "Je touche les pages lisses de mon nouveau cahier.",
+                "Je touche mon pupitre froid et bien propre.",
+                "Je touche les couvertures cartonnées de mes livres.",
+                "Je touche mon sac à dos rempli de fournitures.",
+                "Je touche la poignée métallique de la porte de la classe."
+            ],
+            gouter: [
+                "Je goûte une pomme croquante à la récréation.",
+                "Je goûte mon jus frais pendant la collation.",
+                "Je goûte un biscuit sucré dans ma boîte à lunch.",
+                "Je goûte un sandwich préparé pour le dîner.",
+                "Je goûte des raisins juteux pendant la pause."
+            ],
+            ressentir: [
+                "Je me sens heureux de retrouver mes amis.",
+                "Je me sens excité à l'idée de découvrir ma nouvelle classe.",
+                "Je me sens fier de montrer mon nouveau matériel scolaire.",
+                "Je me sens un peu nerveux devant toutes ces nouveautés.",
+                "Je me sens rassuré lorsque l'enseignante me sourit.",
+                "Je me sens curieux de découvrir ce que nous allons apprendre.",
+                "Je me sens impatient de participer aux activités de la journée.",
+                "Je me sens confiant lorsque je réussis une tâche.",
+                "Je me sens étonné par les décorations de la classe.",
+                "Je me sens calme lorsque je lis un livre dans mon coin préféré."
+            ]
+        };
+
+        // État dynamique du paragraphe
+        const activeIdeas = {
+            voir: { text: null, transition: "" },
+            entendre: { text: null, transition: "" },
+            sentir: { text: null, transition: "" },
+            toucher: { text: null, transition: "" },
+            gouter: { text: null, transition: "" },
+            ressentir: { text: null, transition: "" }
+        };
+
+        // Configuration explicite des classes pour Tailwind CDN
+        const stylesCSS = {
+            voir: { text: 'text-purple-800', bg: 'bg-purple-100', border: 'border-purple-400' },
+            entendre: { text: 'text-blue-800', bg: 'bg-blue-100', border: 'border-blue-400' },
+            sentir: { text: 'text-green-800', bg: 'bg-green-100', border: 'border-green-400' },
+            toucher: { text: 'text-orange-800', bg: 'bg-orange-100', border: 'border-orange-400' },
+            gouter: { text: 'text-pink-800', bg: 'bg-pink-100', border: 'border-pink-400' },
+            ressentir: { text: 'text-red-800', bg: 'bg-red-100', border: 'border-red-400' }
+        };
+
+        function addIdea(senseType) {
+            // Choisir une phrase au hasard
+            const options = ideaBank[senseType];
+            const randomIdea = options[Math.floor(Math.random() * options.length)];
+            
+            // Si c'est un nouvel ajout, on lui met une transition vide par défaut
+            if(!activeIdeas[senseType].text) {
+                activeIdeas[senseType] = { text: randomIdea, transition: "" };
+            } else {
+                // Si on a re-cliqué, on change juste le texte et on garde la transition choisie
+                activeIdeas[senseType].text = randomIdea;
+            }
+            
+            // Style du bouton
+            const btn = document.getElementById(`btn-${senseType}`);
+            btn.classList.add(stylesCSS[senseType].bg, stylesCSS[senseType].border);
+            
+            updateSimSentence();
+        }
+
+        function clearSim() {
+            // Réinitialiser les idées
+            for (let sense in activeIdeas) {
+                activeIdeas[sense] = { text: null, transition: "" };
+                // Retirer le style dynamique des boutons
+                const btn = document.getElementById(`btn-${sense}`);
+                if(btn) {
+                    btn.className = `sim-btn text-left p-3 rounded-lg border-2 border-gray-200 transition shadow-sm`;
+                    
+                    // Remettre le hover par défaut spécifique au sens
+                    if(sense === 'voir') btn.classList.add('hover:border-purple-400', 'hover:bg-purple-50');
+                    if(sense === 'entendre') btn.classList.add('hover:border-blue-400', 'hover:bg-blue-50');
+                    if(sense === 'sentir') btn.classList.add('hover:border-green-400', 'hover:bg-green-50');
+                    if(sense === 'toucher') btn.classList.add('hover:border-orange-400', 'hover:bg-orange-50');
+                    if(sense === 'gouter') btn.classList.add('hover:border-pink-400', 'hover:bg-pink-50');
+                    if(sense === 'ressentir') btn.classList.add('hover:border-red-400', 'hover:bg-red-50');
+                }
+            }
+            // Réinitialiser la phrase de base au defaut
+            startSentence = "Quand j'arrive à l'école, je regarde autour de moi.";
+            
+            updateSimSentence();
+        }
+
+        // Gestion du menu déroulant personnalisé de l'action de départ
+        function toggleStartDropdown(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById('start-dropdown-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function selectStartOption(val) {
+            startSentence = val;
+            const menu = document.getElementById('start-dropdown-menu');
+            if (menu) menu.classList.add('hidden');
+            updateSimSentence();
+        }
+
+        function updateTransition(sense, val) {
+            activeIdeas[sense].transition = val;
+            updateSimSentence();
+        }
+
+        // Helper pour majuscule/minuscule
+        function capitalize(str) {
+            if (!str) return "";
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        function lowercase(str) {
+            if (!str) return "";
+            return str.charAt(0).toLowerCase() + str.slice(1);
+        }
+
+        function buildTransitionDropdown(sense) {
+            const currentVal = activeIdeas[sense].transition;
+            let html = `<select class="transition-select text-lg font-bold bg-white text-school-blue rounded py-1 mb-1 shadow-sm border border-blue-200" onchange="updateTransition('${sense}', this.value)">`;
+            
+            const groups = {
+                "---": [{val: "", label: "+ Mot de liaison"}],
+                "Temps et Espace": ["Ensuite", "Puis", "Après cela", "Un peu plus loin", "À côté", "Non loin de là", "Tout près", "En même temps", "Tout autour de moi", "Soudain", "Pendant ce temps", "Dans l'air", "Au loin", "Près de moi", "À ce moment-là", "De tous côtés"],
+                "Ajout": ["De plus", "Aussi", "En plus"],
+                "Cause et Conséquence": ["Car", "Parce que", "En effet", "Puisque", "C'est pourquoi", "Ainsi", "Donc", "Voilà pourquoi", "Grâce à", "Comme"],
+                "Réaction": ["En voyant cela", "Devant ce spectacle", "À ce moment", "Peu à peu", "Immédiatement"]
+            };
+
+            for (const [groupLabel, options] of Object.entries(groups)) {
+                if(groupLabel === "---") {
+                    html += `<option value="">${options[0].label}</option>`;
+                } else {
+                    html += `<optgroup label="${groupLabel}">`;
+                    options.forEach(opt => {
+                        const selected = currentVal === opt ? "selected" : "";
+                        html += `<option value="${opt}" ${selected}>${opt},</option>`;
+                    });
+                    html += `</optgroup>`;
+                }
+            }
+            html += `</select>`;
+            return html;
+        }
+
+        function updateSimSentence() {
+            const container = document.getElementById('sim-sentence');
+            container.innerHTML = ''; 
+
+            // Gérer le sélecteur de phrase de départ personnalisé avec retour à la ligne supporté
+            const startSelectHTML = `
+                <div class="relative inline-block w-full mb-4 text-left">
+                    <button onclick="toggleStartDropdown(event)" id="start-dropdown-btn" class="w-full text-left text-lg md:text-xl font-bold bg-blue-50 border-2 border-school-blue text-school-blue rounded-xl px-4 py-2 flex justify-between items-center shadow-sm focus:outline-none focus:ring-2 focus:ring-school-blue">
+                        <span id="start-dropdown-text" class="normal-case whitespace-normal pr-8 leading-relaxed">${startSentence}</span>
+                        <i class="fa-solid fa-chevron-down text-school-blue shrink-0"></i>
+                    </button>
+                    <div id="start-dropdown-menu" class="hidden absolute left-0 right-0 mt-1 bg-white border-2 border-school-blue rounded-xl shadow-xl z-30 max-h-80 overflow-y-auto">
+                        <div onclick="selectStartOption('Quand j\\\'arrive à l\\\'école, je regarde autour de moi.')" class="p-3 hover:bg-blue-50 cursor-pointer font-bold text-school-blue border-b border-gray-100 transition duration-150">Quand j'arrive à l'école, je regarde autour de moi.</div>
+                        <div onclick="selectStartOption('En entrant dans la classe le matin,')" class="p-3 hover:bg-blue-50 cursor-pointer font-bold text-school-blue border-b border-gray-100 transition duration-150">En entrant dans la classe le matin,</div>
+                        <div onclick="selectStartOption('Lors de la récréation,')" class="p-3 hover:bg-blue-50 cursor-pointer font-bold text-school-blue border-b border-gray-100 transition duration-150">Lors de la récréation,</div>
+                        <div onclick="selectStartOption('Dans le grand corridor de l\\\'école,')" class="p-3 hover:bg-blue-50 cursor-pointer font-bold text-school-blue border-b border-gray-100 transition duration-150">Dans le grand corridor de l'école,</div>
+                        <div onclick="selectStartOption('Le premier jour de la rentrée,')" class="p-3 hover:bg-blue-50 cursor-pointer font-bold text-school-blue last:border-0 transition duration-150">Le premier jour de la rentrée,</div>
+                    </div>
+                </div><br/>
+            `;
+            
+            const parts = [startSelectHTML];
+            let hasAddedIdea = false;
+
+            // Ajouter les idées actives (Maintient un ordre logique par défaut)
+            const order = ['voir', 'entendre', 'sentir', 'toucher', 'gouter', 'ressentir'];
+            
+            order.forEach(sense => {
+                if(activeIdeas[sense].text) {
+                    hasAddedIdea = true;
+                    let textColor = stylesCSS[sense].text;
+                    let bgColor = stylesCSS[sense].bg;
+                    let borderColor = stylesCSS[sense].border;
+                    
+                    let transitionVal = activeIdeas[sense].transition;
+                    let dropdownHTML = buildTransitionDropdown(sense);
+                    
+                    // Logique grammaticale : majuscules ou minuscules
+                    let textToShow = "";
+                    if (transitionVal === "") {
+                        textToShow = capitalize(activeIdeas[sense].text);
+                    } else {
+                        textToShow = lowercase(activeIdeas[sense].text);
+                    }
+                    
+                    // Assembler le bloc avec le selecteur de transition et le texte
+                    let blockHTML = `
+                        <span class="${textColor} ${bgColor} border ${borderColor} px-3 py-2 rounded-lg leading-loose mb-3 inline-block transition-all duration-300 shadow-sm mr-2" title="${capitalize(sense)}">
+                            ${dropdownHTML} <span class="font-medium">${textToShow}</span>
+                        </span>
+                    `;
+                    parts.push(blockHTML);
+                }
+            });
+
+            if(!hasAddedIdea) {
+                parts.push('<br/><span class="text-gray-400 italic">Clique sur les boutons ci-dessous pour ajouter des phrases à ton texte...</span>');
+            }
+
+            container.innerHTML = parts.join(' ');
+        }
+
+        // Fermer le menu déroulant d'action de départ en cas de clic à l'extérieur
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('start-dropdown-menu');
+            const btn = document.getElementById('start-dropdown-btn');
+            if (menu && !menu.classList.contains('hidden') && event.target !== btn && !btn.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+
+        // ==========================================
+        // ONGLET 2 : PRATIQUE GUIDÉE (JEU COHÉRENT & SÉCURISÉ)
+        // ==========================================
+        
+        // Base de données des exercices avec validations multiples autorisées
+        const gameLevels = [
+            {
+                id: 1,
+                target: ["Le matin,", "je marche", "dans la grande école", "bruyante", "et je me sens", "excité."],
+                shuffled: ["bruyante", "je marche", "Le matin,", "et je me sens", "excité.", "dans la grande école"],
+                // Plusieurs combinaisons font du sens syntaxiquement et sémantiquement
+                validCombinations: [
+                    ["Le matin,", "je marche", "dans la grande école", "bruyante", "et je me sens", "excité."],
+                    ["Le matin,", "je marche", "bruyante", "dans la grande école", "et je me sens", "excité."],
+                    ["Je marche", "dans la grande école", "bruyante", "Le matin,", "et je me sens", "excité."],
+                    ["Je marche", "bruyante", "dans la grande école", "Le matin,", "et je me sens", "excité."]
+                ],
+                hint: "💡 RAPPEL : On place souvent le moment ('Le matin,') soit tout au début ou juste après l'action principale."
+            },
+            {
+                id: 2,
+                target: ["Soudain,", "la cloche", "stridente", "sonne", "fortement", "et je sursaute", "de peur."],
+                shuffled: ["fortement", "la cloche", "et je sursaute", "de peur.", "Soudain,", "sonne", "stridente"],
+                validCombinations: [
+                    ["Soudain,", "la cloche", "stridente", "sonne", "fortement", "et je sursaute", "de peur."],
+                    ["Soudain,", "la cloche", "stridente", "sonne", "et je sursaute", "de peur.", "fortement"], // valide aussi
+                    ["Soudain,", "la cloche", "sonne", "fortement", "stridente", "et je sursaute", "de peur."],
+                    ["La cloche", "stridente", "sonne", "fortement", "Soudain,", "et je sursaute", "de peur."]
+                ],
+                hint: "💡 RAPPEL : 'Soudain,' montre l'effet de surprise. L'adjectif 'stridente' décrit l'état de 'la cloche'."
+            },
+            {
+                id: 3,
+                target: ["Dans la classe,", "je vois", "mon professeur", "souriant", "qui sent", "le café chaud."],
+                shuffled: ["souriant", "mon professeur", "Dans la classe,", "qui sent", "le café chaud.", "je vois"],
+                validCombinations: [
+                    ["Dans la classe,", "je vois", "mon professeur", "souriant", "qui sent", "le café chaud."],
+                    ["Dans la classe,", "je vois", "mon professeur", "qui sent", "le café chaud.", "souriant"],
+                    ["Je vois", "mon professeur", "souriant", "qui sent", "le café chaud.", "Dans la classe,"],
+                    ["Je vois", "mon professeur", "souriant", "Dans la classe,", "qui sent", "le café chaud."]
+                ],
+                hint: "💡 RAPPEL : 'Dans la classe,' indique le lieu. Les expansions viennent compléter le professeur et son odeur."
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        let score = 0;
+        let bankWords = [];
+        let sentenceWords = [];
+
+        function initGameLevel() {
+            const level = gameLevels[currentLevelIndex];
+            document.getElementById('level-title').innerText = `Phrase #${currentLevelIndex + 1}`;
+            
+            bankWords = [...level.shuffled];
+            sentenceWords = [];
+            
+            document.getElementById('feedback-message').classList.add('hidden');
+            renderGameUI();
+        }
+
+        // Glisser-déposer standard HTML5
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function handleDragStart(ev, word, source) {
+            ev.dataTransfer.setData("text/plain", JSON.stringify({ word: word, source: source }));
+        }
+
+        function handleDropZone(ev) {
+            ev.preventDefault();
+            try {
+                const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
+                if (data.source === 'bank') {
+                    const index = bankWords.indexOf(data.word);
+                    if (index > -1) {
+                        bankWords.splice(index, 1);
+                        sentenceWords.push(data.word);
+                        renderGameUI();
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function handleBankZone(ev) {
+            ev.preventDefault();
+            try {
+                const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
+                if (data.source === 'sentence') {
+                    const index = sentenceWords.indexOf(data.word);
+                    if (index > -1) {
+                        sentenceWords.splice(index, 1);
+                        bankWords.push(data.word);
+                        renderGameUI();
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // Déplacer les mots via boutons fléchés (Garantit 100% de réussite sur TNI et tactile)
+        function moveWordLeft(index, event) {
+            if (event) event.stopPropagation();
+            if (index > 0) {
+                const temp = sentenceWords[index];
+                sentenceWords[index] = sentenceWords[index - 1];
+                sentenceWords[index - 1] = temp;
+                renderGameUI();
+            }
+        }
+
+        function moveWordRight(index, event) {
+            if (event) event.stopPropagation();
+            if (index < sentenceWords.length - 1) {
+                const temp = sentenceWords[index];
+                sentenceWords[index] = sentenceWords[index + 1];
+                sentenceWords[index + 1] = temp;
+                renderGameUI();
+            }
+        }
+
+        function moveToSentence(index) {
+            const word = bankWords.splice(index, 1)[0];
+            sentenceWords.push(word);
+            renderGameUI();
+            document.getElementById('feedback-message').classList.add('hidden');
+        }
+
+        function moveToBank(index) {
+            const word = sentenceWords.splice(index, 1)[0];
+            bankWords.push(word);
+            renderGameUI();
+        }
+
+        function renderGameUI() {
+            const dropZone = document.getElementById('drop-zone');
+            const wordBank = document.getElementById('word-bank');
+
+            // Affichage dans la zone de dépôt
+            dropZone.innerHTML = '';
+            if (sentenceWords.length > 0) {
+                dropZone.classList.add('filled');
+            } else {
+                dropZone.classList.remove('filled');
+            }
+
+            sentenceWords.forEach((word, index) => {
+                const container = document.createElement('div');
+                container.className = "word-chip flex items-center bg-white border-2 border-school-blue text-school-blue text-lg font-bold rounded-xl shadow p-1 pr-3 pl-3 gap-2 cursor-pointer";
+                container.setAttribute("draggable", "true");
+                container.ondragstart = (e) => handleDragStart(e, word, 'sentence');
+                
+                // Bouton Gauche (TNI)
+                const leftArrow = document.createElement('button');
+                leftArrow.className = "text-xs px-1.5 py-0.5 bg-blue-100 hover:bg-blue-200 text-school-blue rounded shadow border border-blue-200 transition active:scale-95";
+                leftArrow.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+                leftArrow.title = "Déplacer à gauche";
+                leftArrow.onclick = (e) => moveWordLeft(index, e);
+                if (index === 0) leftArrow.style.visibility = 'hidden';
+
+                // Texte de l'étiquette
+                const labelText = document.createElement('span');
+                labelText.innerText = word;
+                labelText.className = "select-none";
+                labelText.onclick = () => moveToBank(index);
+
+                // Bouton Droite (TNI)
+                const rightArrow = document.createElement('button');
+                rightArrow.className = "text-xs px-1.5 py-0.5 bg-blue-100 hover:bg-blue-200 text-school-blue rounded shadow border border-blue-200 transition active:scale-95";
+                rightArrow.innerHTML = '<i class="fa-solid fa-arrow-right"></i>';
+                rightArrow.title = "Déplacer à droite";
+                rightArrow.onclick = (e) => moveWordRight(index, e);
+                if (index === sentenceWords.length - 1) rightArrow.style.visibility = 'hidden';
+
+                container.appendChild(leftArrow);
+                container.appendChild(labelText);
+                container.appendChild(rightArrow);
+                
+                dropZone.appendChild(container);
+            });
+
+            // Affichage dans la banque de mots
+            wordBank.innerHTML = '';
+            bankWords.forEach((word, index) => {
+                const btn = document.createElement('div');
+                btn.className = "word-chip bg-school-yellow text-school-dark text-lg font-bold py-2 px-4 rounded-xl shadow-md hover:bg-yellow-400 cursor-pointer active:scale-95";
+                btn.innerText = word;
+                btn.setAttribute("draggable", "true");
+                btn.ondragstart = (e) => handleDragStart(e, word, 'bank');
+                btn.onclick = () => moveToSentence(index);
+                wordBank.appendChild(btn);
+            });
+        }
+
+        function checkAnswer() {
+            const level = gameLevels[currentLevelIndex];
+            const feedbackBox = document.getElementById('feedback-message');
+            feedbackBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-yellow-100', 'text-yellow-800');
+            
+            // S'assurer que tous les mots ont été placés
+            if (bankWords.length > 0) {
+                feedbackBox.innerHTML = "❌ Place d'abord tous les mots au tableau avant de vérifier !";
+                feedbackBox.classList.add('bg-red-100', 'text-red-700', 'shake');
+                setTimeout(() => feedbackBox.classList.remove('shake'), 500);
+                return;
+            }
+
+            // Vérification intelligente basée sur les combinaisons syntaxiquement correctes
+            let isValid = false;
+            for (let combo of level.validCombinations) {
+                let match = true;
+                for (let i = 0; i < combo.length; i++) {
+                    if (sentenceWords[i] !== combo[i]) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    isValid = true;
+                    break;
+                }
+            }
+
+            if (isValid) {
+                feedbackBox.innerHTML = "✅ Magnifique ! Ta phrase est parfaitement structurée, elle a du sens !";
+                feedbackBox.classList.add('bg-green-100', 'text-green-700');
+                
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+
+                score++;
+                document.getElementById('score-display').innerText = score;
+
+                // Passer à la phrase suivante ou terminer
+                setTimeout(() => {
+                    if (currentLevelIndex < gameLevels.length - 1) {
+                        currentLevelIndex++;
+                        initGameLevel();
+                    } else {
+                        feedbackBox.innerHTML = "🎉 EXCELLENT ! Tu as complété toute la pratique guidée ! Passe maintenant au Défi Autonome !";
+                        feedbackBox.classList.add('bg-yellow-100', 'text-yellow-800');
+                    }
+                }, 2500);
+
+            } else {
+                feedbackBox.innerHTML = "❌ L'ordre n'est pas tout à fait logique. Utilise les flèches pour réordonner les mots !";
+                feedbackBox.classList.add('bg-red-100', 'text-red-700', 'shake');
+                setTimeout(() => feedbackBox.classList.remove('shake'), 500);
+            }
+        }
+
+        function showHint() {
+            const level = gameLevels[currentLevelIndex];
+            const feedbackBox = document.getElementById('feedback-message');
+            feedbackBox.innerHTML = level.hint;
+            feedbackBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            feedbackBox.classList.add('bg-blue-100', 'text-blue-800');
+        }
+
+        function resetExercise() {
+            initGameLevel();
+        }
+
+        // ==========================================
+        // INITIALISATION
+        // ==========================================
+        window.onload = () => {
+            updateSimSentence(); // Initialiser la phrase de départ sur l'onglet 1
+            initGameLevel();     // Lancer le premier niveau d'exercices
+            
+            // Empêcher les comportements tactiles indésirables du double-clic
+            document.addEventListener('dblclick', function(event) {
+                event.preventDefault();
+            }, { passive: false });
+        };
+
+    </script>
+</body>
+</html>
